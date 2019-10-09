@@ -5,41 +5,43 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AnagramCheckerLogic;
+using Microsoft.Extensions.Configuration;
 
 namespace AnagramCheckerAPI.Controllers
 {
     [ApiController]
-    [Route("checkAnagram")]
+    [Route("api")]
     public class AnagramChecker : ControllerBase
     {
         private readonly ILogger<AnagramChecker> logger;
-        public AnagramChecker(ILogger<AnagramChecker> logger)
+        private readonly IConfiguration config;
+
+        public AnagramChecker(ILogger<AnagramChecker> logger, IConfiguration config)
         {
-            this.logger = logger; 
+            this.logger = logger;
+            this.config = config;
         }
 
         [HttpPost]
+        [Route("checkAnagram")]
         public IActionResult AnagramCheck([FromBody] Words words)
         {
-            /*
-            string w1, w2;
-            try
-            {
-                w1 = words["w1"].ToString();
-                w2 = words["w2"].ToString();
-            }
-            catch(Exception ex)
-            {
-                logger.LogCritical(ex, "expected parameters not found");
-                throw;
-            }
-            */
             ITwoWordChecker anagramChecker = new TwoAnagramChecker();
             if (anagramChecker.checkTwoWords(words.W1, words.W2))
             {
                 return Ok(words.W1 + " and " + words.W2 + " are anagrams");
             }
             return BadRequest(words.W1 + " and " + words.W2 + " are no anagrams");
+        }
+
+        [HttpGet]
+        [Route("getKnown")]
+        public IActionResult AnagramFinder([FromQuery] string word)
+        {
+            IMatchingWordFinder matchingWordFinder = new MatchingAnagramFinder();
+            var matching = matchingWordFinder.FindMatching(word, config["dictionaryFileName"]);
+            if (matching.Count() == 0) return NotFound();
+            return Ok(matching);
         }
     }
 }

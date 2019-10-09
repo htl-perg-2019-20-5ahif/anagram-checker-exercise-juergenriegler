@@ -20,7 +20,7 @@
     "AnagramCheckerAPI": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "checkAnagram",
+      "launchUrl": "api/checkAnagram",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
